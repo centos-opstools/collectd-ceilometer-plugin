@@ -5,6 +5,8 @@
 %global with_python3 0
 %endif
 
+%global with_tests 0
+
 Name:           %{pypi_name}
 Version:        1.0.1
 Release:        2%{?dist}
@@ -17,11 +19,11 @@ BuildArch:      noarch
 
 BuildRequires:  python2-devel
 BuildRequires:  python-pbr
+%if 0%{?with_tests} >0
 BuildRequires:  python-hacking
 BuildRequires:  python-coverage
 BuildRequires:  python-flake8
 BuildRequires:  python-mock
-BuildRequires:  python-oslo-sphinx
 BuildRequires:  python-oslotest
 BuildRequires:  python-os-testr
 BuildRequires:  python-testrepository
@@ -30,8 +32,10 @@ BuildRequires:  python-subunit
 BuildRequires:  python-sphinx
 BuildRequires:  python-testscenarios
 BuildRequires:  python-testtools
+%endif
 BuildRequires:  python-setuptools
 BuildRequires:  python-sphinx
+BuildRequires:  python-oslo-sphinx
 
 
 %description
@@ -96,7 +100,7 @@ Documentation for collectd-ceilometer-plugin
 %autosetup -n %{pypi_name}-%{version}
 
 %build
-%py2_build
+%{__python2} setup.py build
 %if 0%{?with_python3} > 0
 %py3_build
 %endif
@@ -112,11 +116,12 @@ rm -rf html/.{doctrees,buildinfo}
 %py3_install
 %endif
 
-%py2_install
+%{__python2} setup.py install --skip-build --root %{buildroot}
 
-
+%if 0%{?with_tests} > 0
 %check
 %{__python2} setup.py testr --slowest
+%endif
 
 %files -n python2-%{pypi_name}
 %license LICENSE
